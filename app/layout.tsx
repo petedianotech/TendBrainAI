@@ -5,7 +5,7 @@ import './globals.css'; // Global styles
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'TrendBrain - AI Social Media Autopilot',
+  title: 'Tend Brain AI - AI Social Media Autopilot',
   description: 'AI-powered social media autopilot that scans global trends and automatically writes daily posts.',
 };
 

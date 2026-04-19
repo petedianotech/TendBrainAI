@@ -41,7 +41,7 @@ export default function Dashboard() {
     { id: 3, title: 'Future of Remote Work', platform: 'LinkedIn', time: 'Today 10:00 AM' }
   ]);
   const [published, setPublished] = useState([
-    { id: 4, title: 'Announcing TrendBrain', platform: 'Twitter', time: 'Yesterday 2:00 PM' }
+    { id: 4, title: 'Announcing Tend Brain AI', platform: 'Twitter', time: 'Yesterday 2:00 PM' }
   ]);
   const [niche, setNiche] = useState('SaaS Startup Founders');
   const [tone, setTone] = useState('Professional but approachable');
@@ -59,7 +59,7 @@ export default function Dashboard() {
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
       const prompt = `
-        You are TrendBrain, an AI-powered social media autopilot. 
+        You are Tend Brain AI, an AI-powered social media autopilot. 
         My user's niche is: "${niche}".
         Their brand tone is: "${tone}".
 
@@ -96,7 +96,7 @@ export default function Dashboard() {
           <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center">
             <Bot size={20} className="text-white" />
           </div>
-          <span className="font-bold text-xl tracking-tight text-white">TrendBrain</span>
+          <span className="font-bold text-xl tracking-tight text-white">Tend Brain AI</span>
         </div>
         
         <nav className="flex-1 p-4 space-y-2">
