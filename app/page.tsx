@@ -2,7 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { auth, db } from '@/lib/firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { 
+  doc, 
+  getDoc, 
+  setDoc, 
+  collection, 
+  query, 
+  where, 
+  onSnapshot, 
+  addDoc, 
+  serverTimestamp,
+  orderBy
+} from 'firebase/firestore';
 import { 
   Bot, LayoutDashboard, CalendarDays, Settings, 
   Activity, ArrowRight, CheckCircle2,
@@ -19,48 +32,69 @@ export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
   
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        router.push('/auth');
-      } else {
-        setLoading(false);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        router.push('/auth');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [router]);
-
-  const [drafts, setDrafts] = useState([
-    { id: 1, title: 'AI in Healthcare 2026', platform: 'LinkedIn', time: 'Generated 2h ago' },
-    { id: 2, title: 'Sustainable Tech Tips', platform: 'Twitter', time: 'Generated 5h ago' }
-  ]);
-  const [scheduled, setScheduled] = useState([
-    { id: 3, title: 'Future of Remote Work', platform: 'LinkedIn', time: 'Today 10:00 AM' }
-  ]);
-  const [published, setPublished] = useState([
-    { id: 4, title: 'Announcing Tend Brain AI', platform: 'Twitter', time: 'Yesterday 2:00 PM' }
-  ]);
-  
-  // App State
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'settings'>('dashboard');
-  
-  // Settings State
   const [niche, setNiche] = useState('SaaS Startup Founders');
   const [tone, setTone] = useState('Professional but approachable');
   const [twitterApiKey, setTwitterApiKey] = useState('');
   const [linkedinApiKey, setLinkedinApiKey] = useState('');
   
+  const [drafts, setDrafts] = useState<any[]>([]);
+  const [scheduled, setScheduled] = useState<any[]>([]);
+  const [published, setPublished] = useState<any[]>([]);
+  
   const [generatedPost, setGeneratedPost] = useState('');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'settings'>('dashboard');
 
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        router.push('/auth');
+      } else {
+        // Load Brand Settings
+        const profileDoc = await getDoc(doc(db, 'brandProfiles', user.uid));
+        if (profileDoc.exists()) {
+          const data = profileDoc.data();
+          setNiche(data.niche || '');
+          setTone(data.tone || '');
+          setTwitterApiKey(data.twitterApiKey || '');
+          setLinkedinApiKey(data.linkedinApiKey || '');
+        }
+
+        // Load Posts real-time
+        const q = query(collection(db, 'posts'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
+        const unsubscribePosts = onSnapshot(q, (snapshot) => {
+          const allPosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setDrafts(allPosts.filter((p: any) => p.status === 'draft'));
+          setScheduled(allPosts.filter((p: any) => p.status === 'scheduled'));
+          setPublished(allPosts.filter((p: any) => p.status === 'published'));
+          setLoading(false);
+        });
+
+        return () => unsubscribePosts();
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, [router]);
+
+  const saveSettings = async () => {
+    if (!auth.currentUser) return;
+    try {
+      await setDoc(doc(db, 'brandProfiles', auth.currentUser.uid), {
+        niche,
+        tone,
+        twitterApiKey,
+        linkedinApiKey,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      alert('Settings saved successfully!');
+    } catch (error) {
+      console.error(error);
+      alert('Error saving settings.');
+    }
+  };
+  
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOut(auth);
   };
 
   const generatePost = async () => {
@@ -98,11 +132,17 @@ export default function Dashboard() {
 
       setGeneratedPost(response.text || 'Failed to generate post text.');
       
-      // Add to drafts
-      setDrafts(prev => [
-        { id: Date.now(), title: 'Live Trend Draft', platform: 'Cross-platform', time: 'Just now' },
-        ...prev
-      ]);
+      // Save to Firestore as Draft
+      if (auth.currentUser) {
+        await addDoc(collection(db, 'posts'), {
+          userId: auth.currentUser.uid,
+          title: 'AI Trend Draft',
+          content: response.text,
+          platform: 'Cross-platform',
+          status: 'draft',
+          createdAt: serverTimestamp()
+        });
+      }
     } catch (error) {
       console.error(error);
       alert('Failed to generate post. See console for details.');
@@ -349,7 +389,10 @@ export default function Dashboard() {
                 </div>
                 
                 <div className="mt-8 flex justify-end">
-                  <button className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                  <button 
+                    onClick={saveSettings}
+                    className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                  >
                     Save Connections &rarr;
                   </button>
                 </div>
@@ -492,7 +535,11 @@ function KanbanColumn({ title, count, items, icon }: { title: string, count: num
               }`}>
                 {item.platform}
               </span>
-              <span className="text-xs text-slate-500">{item.time}</span>
+              <span className="text-xs text-slate-500">
+                {item.createdAt?.seconds 
+                  ? new Date(item.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                  : item.time}
+              </span>
             </div>
             <p className="text-sm font-medium text-white">{item.title}</p>
           </div>
