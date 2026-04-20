@@ -1,10 +1,10 @@
 {
-  "projectId": "tendbrainai",
-  "appId": "1:793535895510:web:9a08f9583d2dc9b4d2b677",
-  "apiKey": "AIzaSyCfZmsjGBAlDhZjsRvmQdUOe4g5DKxObMA",
-  "authDomain": "tendbrainai.firebaseapp.com",
+  "projectId": "trendbrainai",
+  "appId": "1:811695574895:web:05c33e2a1a32b7b2e8e29a",
+  "apiKey": "AIzaSyDUjQdkH7BVJzciMFWCZpZ3La0ClMPF7sQ",
+  "authDomain": "trendbrainai.firebaseapp.com",
   "firestoreDatabaseId": "ai-studio-e74a1996-3a87-4ccb-8269-5c548d0cc89c",
-  "storageBucket": "tendbrainai.firebasestorage.app",
-  "messagingSenderId": "793535895510",
+  "storageBucket": "trendbrainai.firebasestorage.app",
+  "messagingSenderId": "811695574895",
   "measurementId": ""
 }
