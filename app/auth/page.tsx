@@ -91,7 +91,7 @@ export default function AuthPage() {
           <div className="w-12 h-12 rounded-xl bg-indigo-500 flex items-center justify-center mb-4">
             <Bot size={28} className="text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight text-center">Tend Brain AI</h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight text-center">TrendBrainAI</h1>
           <p className="text-slate-400 mt-2 text-center text-sm">Your AI-powered social media autopilot.</p>
         </div>
 

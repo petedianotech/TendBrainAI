@@ -19,7 +19,9 @@ import {
 import { 
   Bot, LayoutDashboard, CalendarDays, Settings, 
   Activity, ArrowRight, CheckCircle2,
-  Clock, Plus, MessageSquare, Zap, Menu, X
+  Clock, Plus, MessageSquare, Zap, Menu, X,
+  Github, Twitter, Linkedin, Facebook, Instagram, Youtube,
+  ShieldCheck, Share2, Globe, Send, Sparkles
 } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 import { motion, AnimatePresence } from 'motion/react';
@@ -162,6 +164,8 @@ export default function Dashboard() {
             activeTab={activeTab} 
             setActiveTab={setActiveTab} 
             onSignOut={handleSignOut} 
+            twitterApiKey={twitterApiKey}
+            linkedinApiKey={linkedinApiKey}
           />
         </aside>
       )}
@@ -193,6 +197,8 @@ export default function Dashboard() {
                   setIsSidebarOpen(false);
                 }}
                 onSignOut={handleSignOut} 
+                twitterApiKey={twitterApiKey}
+                linkedinApiKey={linkedinApiKey}
               />
             </motion.aside>
           </>
@@ -249,27 +255,29 @@ export default function Dashboard() {
 
             
             {/* Live Trend Radar */}
-            <div className="col-span-1 xl:col-span-2 bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4 md:p-6 backdrop-blur-sm">
+            <div className="col-span-1 xl:col-span-2 bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4 md:p-6 backdrop-blur-sm relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/10 transition-colors pointer-events-none"></div>
+              
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-teal-500/10 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center">
                     <Activity size={20} className="text-teal-500" />
                   </div>
                   <div>
                     <h2 className="text-lg font-semibold text-white">Live Trend Radar</h2>
-                    <p className="text-xs text-slate-400">Global scan across 4 platforms</p>
+                    <p className="text-xs text-slate-400">AI-powered scan across social clusters</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1 bg-slate-900 rounded-full border border-slate-700">
+                <div className="flex items-center gap-2 px-3 py-1 bg-slate-900/50 rounded-full border border-slate-700/50">
                   <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
-                  <span className="text-xs font-medium text-slate-300">Active</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Live Sync</span>
                 </div>
               </div>
               
-              <div className="space-y-4">
-                <TrendItem trend="Artificial Intelligence in Healthcare" match="94%" category="Tech / Medicine" />
-                <TrendItem trend="Sustainable Remote Work Tools" match="88%" category="Business" />
-                <TrendItem trend="The Creator Economy 2.0" match="76%" category="Marketing" />
+              <div className="space-y-3">
+                <TrendItem trend="Artificial Intelligence in Healthcare" category="Tech / Medicine" platformIcon={<Globe size={12}/>} />
+                <TrendItem trend="Sustainable Remote Work Tools" category="Business" platformIcon={<Twitter size={12}/>} />
+                <TrendItem trend="The Creator Economy 2.0" category="Marketing" platformIcon={<Linkedin size={12}/>} />
               </div>
             </div>
 
@@ -356,44 +364,84 @@ export default function Dashboard() {
               </div>
 
               <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                  <Activity size={120} />
+                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                  <Share2 size={120} />
                 </div>
-                <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                  <Settings size={20} className="text-teal-400" /> Platform Connections
-                </h2>
+                
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <Settings size={20} className="text-teal-400" /> Platform Connections
+                  </h2>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-900 px-3 py-1 rounded-full border border-slate-700">
+                    OAUTH & API
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                  <PlatformCard 
+                    icon={<Twitter className="text-[#1DA1F2]" size={24} />} 
+                    name="X (Twitter)" 
+                    description="Live trends and tweet scheduling"
+                    status={twitterApiKey ? 'Connected' : 'Disconnected'}
+                  />
+                  <PlatformCard 
+                    icon={<Linkedin className="text-[#0A66C2]" size={24} />} 
+                    name="LinkedIn" 
+                    description="Professional networking and brand reach"
+                    status={linkedinApiKey ? 'Connected' : 'Disconnected'}
+                  />
+                  <PlatformCard 
+                    icon={<Instagram className="text-[#E4405F]" size={24} />} 
+                    name="Instagram" 
+                    description="Visual storytelling and reels"
+                    status="Coming Soon"
+                    disabled
+                  />
+                  <PlatformCard 
+                    icon={<Facebook className="text-[#1877F2]" size={24} />} 
+                    name="Facebook" 
+                    description="Community engagement and groups"
+                    status="Coming Soon"
+                    disabled
+                  />
+                </div>
 
                 <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-400 mb-1">X (Twitter) Developer API Key</label>
-                    <input 
-                      type="password"
-                      value={twitterApiKey}
-                      onChange={(e) => setTwitterApiKey(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/50"
-                      placeholder="sk_tw_..."
-                    />
-                    <p className="text-xs text-slate-500 mt-1">Required to directly fetch live &apos;X&apos; trends and auto-publish tweets.</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-400 mb-1">LinkedIn API Bearer Token</label>
-                    <input 
-                      type="password"
-                      value={linkedinApiKey}
-                      onChange={(e) => setLinkedinApiKey(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/50"
-                      placeholder="Enter token..."
-                    />
-                    <p className="text-xs text-slate-500 mt-1">Required to schedule and publish LinkedIn posts automatically.</p>
+                  <div className="p-4 bg-slate-900 rounded-xl border border-slate-700">
+                    <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                      <ShieldCheck size={16} className="text-indigo-400" /> Advanced API Access
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">X (Twitter) Developer API Key</label>
+                        <input 
+                          type="password"
+                          value={twitterApiKey}
+                          onChange={(e) => setTwitterApiKey(e.target.value)}
+                          className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-mono"
+                          placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">LinkedIn API Bearer Token</label>
+                        <input 
+                          type="password"
+                          value={linkedinApiKey}
+                          onChange={(e) => setLinkedinApiKey(e.target.value)}
+                          className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-mono"
+                          placeholder="AQX..."
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
                 <div className="mt-8 flex justify-end">
                   <button 
                     onClick={saveSettings}
-                    className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                    className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
                   >
-                    Save Connections &rarr;
+                    Sync Accounts <ArrowRight size={16} />
                   </button>
                 </div>
               </div>
@@ -414,13 +462,17 @@ function SidebarContent({
   onClose,
   activeTab,
   setActiveTab,
-  onSignOut
+  onSignOut,
+  twitterApiKey,
+  linkedinApiKey
 }: { 
   draftsCount: number, 
   onClose?: () => void,
   activeTab: 'dashboard' | 'settings',
   setActiveTab: (t: 'dashboard' | 'settings') => void,
-  onSignOut: () => void
+  onSignOut: () => void,
+  twitterApiKey: string,
+  linkedinApiKey: string
 }) {
   return (
     <>
@@ -429,7 +481,7 @@ function SidebarContent({
           <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
             <Bot size={20} className="text-white" />
           </div>
-          <span className="font-bold text-xl tracking-tight text-white">Tend Brain AI</span>
+          <span className="font-bold text-xl tracking-tight text-white">TrendBrainAI</span>
         </div>
         {onClose && (
           <button onClick={onClose} className="p-1 hover:bg-slate-800 rounded-lg text-slate-500">
@@ -457,23 +509,34 @@ function SidebarContent({
       </nav>
       
       <div className="p-4 border-t border-slate-800 mt-auto space-y-4">
-        <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 hover:border-slate-600 transition-colors cursor-pointer" onClick={() => setActiveTab('settings')}>
-          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">Social APIs</p>
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-slate-300">Connections</p>
-            <p className="text-xs text-indigo-400 font-medium">0/2 Active</p>
+        <div className="bg-slate-800/80 p-4 rounded-xl border border-slate-700/50 hover:border-indigo-500/30 transition-all cursor-pointer group" onClick={() => setActiveTab('settings')}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">Active Channels</p>
+            <Sparkles size={12} className="text-indigo-400 animate-pulse" />
           </div>
-          <div className="w-full bg-slate-700 rounded-full h-1.5 mt-2 overflow-hidden">
-            <div className="bg-slate-600 h-1.5 rounded-full" style={{ width: '0%' }}></div>
+          <div className="flex items-center -space-x-2">
+            <div className={`w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center border-2 border-slate-800 overflow-hidden ${twitterApiKey ? 'opacity-100' : 'opacity-30'}`}>
+              <Twitter size={14} className={twitterApiKey ? 'text-[#1DA1F2]' : 'text-slate-400'} />
+            </div>
+            <div className={`w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center border-2 border-slate-800 overflow-hidden ${linkedinApiKey ? 'opacity-100' : 'opacity-30'}`}>
+              <Linkedin size={14} className={linkedinApiKey ? 'text-[#0A66C2]' : 'text-slate-400'} />
+            </div>
+            <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center border-2 border-slate-800 overflow-hidden opacity-10">
+              <Instagram size={14} className="text-slate-400" />
+            </div>
+            <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center border-2 border-slate-800">
+              <Plus size={10} className="text-slate-500" />
+            </div>
           </div>
-          <p className="text-[10px] text-slate-500 mt-2">Click to configure APIs</p>
+          <p className="text-[10px] text-slate-500 mt-3 group-hover:text-slate-300 transition-colors capitalize">click to manage socials</p>
         </div>
 
         <button 
           onClick={onSignOut}
-          className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors font-medium border border-transparent hover:border-red-500/20"
+          className="w-full text-left px-4 py-2.5 text-sm text-slate-500 hover:text-red-400 hover:bg-red-500/5 rounded-xl transition-all font-medium border border-transparent hover:border-red-500/10 flex items-center justify-between group"
         >
           Sign Out
+          <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
         </button>
       </div>
     </>
@@ -498,17 +561,50 @@ function NavItem({ icon, label, active, badge, onClick }: { icon: React.ReactNod
   );
 }
 
-function TrendItem({ trend, match, category }: { trend: string, match: string, category: string }) {
+function TrendItem({ trend, category, platformIcon }: { trend: string, category: string, platformIcon?: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-700/30 transition-colors cursor-pointer group">
-      <div className="flex-1">
-        <h4 className="text-sm font-medium text-slate-200 group-hover:text-indigo-400 transition-colors">{trend}</h4>
-        <p className="text-xs text-slate-500 mt-1">{category}</p>
+    <div className="flex items-center justify-between p-3.5 rounded-xl hover:bg-slate-700/40 border border-transparent hover:border-slate-700/50 transition-all cursor-pointer group">
+      <div className="flex items-center gap-3">
+        {platformIcon && (
+          <div className="w-6 h-6 rounded bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-500 group-hover:text-indigo-400 group-hover:border-indigo-500/30 transition-colors">
+            {platformIcon}
+          </div>
+        )}
+        <div>
+          <h4 className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors">{trend}</h4>
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">{category}</p>
+        </div>
       </div>
       <div className="flex flex-col items-end">
-        <span className="text-xs font-semibold text-teal-500">{match} Match</span>
-        <ArrowRight size={14} className="text-slate-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <ArrowRight size={14} className="text-slate-600 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all" />
       </div>
+    </div>
+  );
+}
+
+function PlatformCard({ icon, name, description, status, disabled }: { icon: React.ReactNode, name: string, description: string, status: string, disabled?: boolean }) {
+  return (
+    <div className={`p-4 rounded-xl border transition-all ${
+      disabled ? 'bg-slate-900/30 border-slate-800 opacity-60' : 'bg-slate-900 border-slate-700 hover:border-indigo-500/50 active:scale-[0.98] cursor-pointer group'
+    }`}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="p-2 bg-slate-800 rounded-lg">
+          {icon}
+        </div>
+        <div className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
+          status === 'Connected' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-800 text-slate-500'
+        }`}>
+          {status}
+        </div>
+      </div>
+      <h3 className="text-sm font-bold text-white mb-1">{name}</h3>
+      <p className="text-xs text-slate-500 leading-relaxed">{description}</p>
+      
+      {!disabled && (
+        <button className="mt-4 w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold uppercase tracking-wider text-slate-300 transition-all invisible group-hover:visible opacity-0 group-hover:opacity-100">
+          Re-authorize
+        </button>
+      )}
     </div>
   );
 }
